@@ -3,6 +3,7 @@ package io.github.screret.simpletech.registry;
 import io.github.screret.simpletech.SimpleTech;
 import io.github.screret.simpletech.blocks.BaseMachineBlock;
 import io.github.screret.simpletech.blocks.enitites.BaseMachineBlockEntity;
+import io.github.screret.simpletech.container.BaseMachineContainer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.inventory.MenuType;
@@ -10,10 +11,12 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -30,11 +33,14 @@ public class ModRegistry {
 
 
     //blocks
-    public static final RegistryObject<Block> BASE_MACHINE_BLOCK = BLOCKS.register("base_machine", () -> new BaseMachineBlock(BlockBehaviour.Properties.of(Material.HEAVY_METAL), 10, 10));
+    public static final RegistryObject<Block> BASE_MACHINE_BLOCK = BLOCKS.register("base_machine", () -> new BaseMachineBlock(BlockBehaviour.Properties.of(Material.HEAVY_METAL).sound(SoundType.METAL).strength(2.0f).lightLevel(state -> state.getValue(BlockStateProperties.POWERED) ? 14 : 0).requiresCorrectToolForDrops(), 50000, 200, 60));
 
     //items
     public static final RegistryObject<Item> BASE_MACHINE_ITEM = ITEMS.register("base_machine", () -> new BlockItem(BASE_MACHINE_BLOCK.get(), new Item.Properties().stacksTo(64).tab(SimpleTech.MOD_TAB)));
 
     //block entities
     public static final RegistryObject<BlockEntityType<BaseMachineBlockEntity>> BASE_MACHINE_BLOCK_ENTITY = BLOCK_ENTITIES.register("base_machine", () -> BlockEntityType.Builder.of(BaseMachineBlockEntity::new, BASE_MACHINE_BLOCK.get()).build(null));
+
+    //containers
+    public static final RegistryObject<MenuType<BaseMachineContainer>> BASE_MACHINE_CONTAINER = CONTAINERS.register("base_machine", () -> IForgeMenuType.create((windowId, inv, data) -> new BaseMachineContainer(windowId, data.readBlockPos(), inv, inv.player)));
 }
