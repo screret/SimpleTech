@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=east,active=false,in_structure=false": {
+      "model": "simpletech:block/fission_reactor_core",
+      "y": 90
+    },
+    "facing=east,active=true,in_structure=false": {
+      "model": "simpletech:block/fission_reactor_core_on",
+      "y": 90
+    },
+    "facing=north,active=false,in_structure=false": {
+      "model": "simpletech:block/fission_reactor_core"
+    },
+    "facing=north,active=true,in_structure=false": {
+      "model": "simpletech:block/fission_reactor_core_on"
+    },
+    "facing=south,active=false,in_structure=false": {
+      "model": "simpletech:block/fission_reactor_core",
+      "y": 180
+    },
+    "facing=south,active=true,in_structure=false": {
+      "model": "simpletech:block/fission_reactor_core_on",
+      "y": 180
+    },
+    "facing=west,active=false,in_structure=false": {
+      "model": "simpletech:block/fission_reactor_core",
+      "y": 270
+    },
+    "facing=west,active=true,in_structure=false": {
+      "model": "simpletech:block/fission_reactor_core_on",
+      "y": 270
+    },
+    "facing=east,active=false,in_structure=true": {
+      "model": "simpletech:block/fission_reactor_core",
+      "y": 90
+    },
+    "facing=east,active=true,in_structure=true": {
+      "model": "simpletech:block/fission_reactor_core_on",
+      "y": 90
+    },
+    "facing=north,active=false,in_structure=true": {
+      "model": "simpletech:block/fission_reactor_core"
+    },
+    "facing=north,active=true,in_structure=true": {
+      "model": "simpletech:block/fission_reactor_core_on"
+    },
+    "facing=south,active=false,in_structure=true": {
+      "model": "simpletech:block/fission_reactor_core",
+      "y": 180
+    },
+    "facing=south,active=true,in_structure=true": {
+      "model": "simpletech:block/fission_reactor_core_on",
+      "y": 180
+    },
+    "facing=west,active=false,in_structure=true": {
+      "model": "simpletech:block/fission_reactor_core",
+      "y": 270
+    },
+    "facing=west,active=true,in_structure=true": {
+      "model": "simpletech:block/fission_reactor_core_on",
+      "y": 270
+    }
+  }
+}

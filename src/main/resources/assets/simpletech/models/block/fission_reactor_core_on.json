@@ -1,0 +1,11 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "simpletech:block/fission_reactor_frame",
+    "up": "simpletech:block/fission_reactor_frame",
+    "west": "simpletech:block/fission_reactor_frame",
+    "east": "simpletech:block/fission_reactor_frame",
+    "north": "simpletech:block/fission_reactor_core_front_on",
+    "south": "simpletech:block/fission_reactor_core_back_on"
+  }
+}

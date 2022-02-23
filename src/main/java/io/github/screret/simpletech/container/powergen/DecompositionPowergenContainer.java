@@ -1,39 +1,41 @@
-package io.github.screret.simpletech.container;
+package io.github.screret.simpletech.container.powergen;
 
 import io.github.screret.simpletech.SimpleTech;
-import io.github.screret.simpletech.blocks.enitites.BaseMachineBlockEntity;
-import io.github.screret.simpletech.capabilities.CapabilityEnergyContainer;
+import io.github.screret.simpletech.blocks.powergen.entities.BurnPowergenBlockEntity;
+import io.github.screret.simpletech.blocks.powergen.entities.DecompositionPowergenBlockEntity;
+import io.github.screret.simpletech.container.BaseContainer;
 import io.github.screret.simpletech.energy.storage.CustomEnergyStorage;
+import io.github.screret.simpletech.recipes.power.DecompositionRecipe;
 import io.github.screret.simpletech.registry.ModRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.*;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.DataSlot;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
-public class BaseMachineContainer extends AbstractContainerMenu {
+public class DecompositionPowergenContainer extends BaseContainer {
 
-    protected final BaseMachineBlockEntity blockEntity;
+    protected final DecompositionPowergenBlockEntity blockEntity;
     protected final Player playerEntity;
-    protected final IItemHandler playerInventory;
 
-    public BaseMachineContainer(int windowId, BlockPos pos, Inventory playerInventory, Player player) {
-        super(ModRegistry.BASE_MACHINE_CONTAINER.get(), windowId);
-        if(player.getCommandSenderWorld().getBlockEntity(pos) instanceof BaseMachineBlockEntity){
-            blockEntity = (BaseMachineBlockEntity) player.getCommandSenderWorld().getBlockEntity(pos);
+    public DecompositionPowergenContainer(int windowId, BlockPos pos, Inventory playerInventory, Player player) {
+        super(ModRegistry.DECOMPOSITION_GENERATOR_CONTAINER.get(), windowId, new InvWrapper(playerInventory));
+        if(player.getCommandSenderWorld().getBlockEntity(pos) instanceof DecompositionPowergenBlockEntity){
+            blockEntity = (DecompositionPowergenBlockEntity) player.getCommandSenderWorld().getBlockEntity(pos);
         }else{
             throw new IllegalStateException("blockentity at pos " + pos + " is not the correct type");
         }
         this.playerEntity = player;
-        this.playerInventory = new InvWrapper(playerInventory);
 
         if (blockEntity != null) {
             blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
@@ -60,7 +62,7 @@ public class BaseMachineContainer extends AbstractContainerMenu {
 
             @Override
             public void set(int value) {
-                blockEntity.getCapability(CapabilityEnergyContainer.ENERGY).ifPresent(h -> {
+                blockEntity.getCapability(CapabilityEnergy.ENERGY).ifPresent(h -> {
                     int energyStored = h.getEnergyStored() & 0xffff0000;
                     ((CustomEnergyStorage)h).setEnergy(energyStored + (value & 0xffff));
                 });
@@ -74,7 +76,7 @@ public class BaseMachineContainer extends AbstractContainerMenu {
 
             @Override
             public void set(int value) {
-                blockEntity.getCapability(CapabilityEnergyContainer.ENERGY).ifPresent(h -> {
+                blockEntity.getCapability(CapabilityEnergy.ENERGY).ifPresent(h -> {
                     int energyStored = h.getEnergyStored() & 0x0000ffff;
                     ((CustomEnergyStorage)h).setEnergy(energyStored | (value << 16));
                 });
@@ -87,10 +89,6 @@ public class BaseMachineContainer extends AbstractContainerMenu {
     }
 
     public int getProgress() {
-        int i = this.blockEntity.getProcessingTime();
-        if (i == 0) {
-            i = 200;
-        }
         return this.getEnergy() / this.blockEntity.maxCapacity;
     }
 
@@ -100,7 +98,7 @@ public class BaseMachineContainer extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player playerIn) {
-        return blockEntity.hasLevel() && stillValid(ContainerLevelAccess.create(blockEntity.getLevel(), blockEntity.getBlockPos()), playerEntity, ModRegistry.BASE_MACHINE_BLOCK.get());
+        return blockEntity.hasLevel() && stillValid(ContainerLevelAccess.create(blockEntity.getLevel(), blockEntity.getBlockPos()), playerIn, ModRegistry.DECOMPOSITION_GENERATOR_BLOCK.get());
     }
 
     @Override
@@ -116,7 +114,8 @@ public class BaseMachineContainer extends AbstractContainerMenu {
                 }
                 slot.onQuickCraft(stack, itemstack);
             } else {
-                if (ForgeHooks.getBurnTime(stack, RecipeType.SMELTING) > 0) {
+                DecompositionRecipe recipe = playerIn.getCommandSenderWorld().getRecipeManager().getRecipeFor(ModRegistry.DECOMPOSITION_RECIPE_TYPE, new SimpleContainer(stack), playerIn.getCommandSenderWorld()).orElse(null);
+                if (recipe != null && recipe.getUsageTime() > 0) {
                     if (!this.moveItemStackTo(stack, 0, 1, false)) {
                         return ItemStack.EMPTY;
                     }
@@ -126,6 +125,12 @@ public class BaseMachineContainer extends AbstractContainerMenu {
                     }
                 } else if (index < 37 && !this.moveItemStackTo(stack, 1, 28, false)) {
                     return ItemStack.EMPTY;
+                }
+                for(DecompositionRecipe recipe1 : playerIn.getCommandSenderWorld().getRecipeManager().getAllRecipesFor(ModRegistry.DECOMPOSITION_RECIPE_TYPE)){
+                    SimpleTech.LOGGER.info(recipe1.getId());
+                    for(ItemStack stack1 : recipe1.getIngredients().get(0).getItems()){
+                        SimpleTech.LOGGER.info(stack1.getItem().getDescriptionId());
+                    }
                 }
             }
 
@@ -143,32 +148,5 @@ public class BaseMachineContainer extends AbstractContainerMenu {
         }
 
         return itemstack;
-    }
-
-
-    private int addSlotRange(IItemHandler handler, int index, int x, int y, int amount, int dx) {
-        for (int i = 0 ; i < amount ; i++) {
-            addSlot(new SlotItemHandler(handler, index, x, y));
-            x += dx;
-            index++;
-        }
-        return index;
-    }
-
-    private int addSlotBox(IItemHandler handler, int index, int x, int y, int horAmount, int dx, int verAmount, int dy) {
-        for (int j = 0 ; j < verAmount ; j++) {
-            index = addSlotRange(handler, index, x, y, horAmount, dx);
-            y += dy;
-        }
-        return index;
-    }
-
-    private void layoutPlayerInventorySlots(int leftCol, int topRow) {
-        // Player inventory
-        addSlotBox(playerInventory, 9, leftCol, topRow, 9, 18, 3, 18);
-
-        // Hotbar
-        topRow += 58;
-        addSlotRange(playerInventory, 0, leftCol, topRow, 9, 18);
     }
 }

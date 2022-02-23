@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "simpletech:block/base_machine_on",
+    "front": "simpletech:block/base_machine_on",
+    "side": "simpletech:block/base_machine_on"
+  }
+}

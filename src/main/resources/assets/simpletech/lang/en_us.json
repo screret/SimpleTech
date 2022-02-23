@@ -1,0 +1,7 @@
+{
+  "message.simpletech.max_generate": "Max generation per tick: %s",
+  "message.simpletech.max_capacity": "Max capacity: %s",
+  "message.simpletech.max_output": "Max output: %s",
+  "block.simpletech.base_machine": "Base Machine",
+  "block.simpletech.base_powergen": "Base Generator"
+}

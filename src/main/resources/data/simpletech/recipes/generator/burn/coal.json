@@ -1,0 +1,10 @@
+{
+  "type": "simpletech:burn",
+  "group": "",
+  "ingredient": {
+    "item": "minecraft:coal",
+    "count": 1
+  },
+  "output": 100,
+  "time": 240
+}

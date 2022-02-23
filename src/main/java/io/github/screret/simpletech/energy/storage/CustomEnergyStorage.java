@@ -1,11 +1,37 @@
 package io.github.screret.simpletech.energy.storage;
 
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.EnergyStorage;
+import net.minecraftforge.energy.IEnergyStorage;
 
-public class CustomEnergyStorage extends EnergyStorage {
+public class CustomEnergyStorage implements IEnergyContainer {
 
-    public CustomEnergyStorage(int capacity, int maxTransfer) {
-        super(capacity, maxTransfer, 0);
+    protected int energy;
+    protected int capacity;
+    protected int maxReceive;
+    protected int maxExtract;
+
+    public CustomEnergyStorage(int capacity)
+    {
+        this(capacity, capacity, capacity, 0);
+    }
+
+    public CustomEnergyStorage(int capacity, int maxTransfer)
+    {
+        this(capacity, maxTransfer, maxTransfer, 0);
+    }
+
+    public CustomEnergyStorage(int capacity, int maxReceive, int maxExtract)
+    {
+        this(capacity, maxReceive, maxExtract, 0);
+    }
+
+    public CustomEnergyStorage(int capacity, int maxReceive, int maxExtract, int energy)
+    {
+        this.capacity = capacity;
+        this.maxReceive = maxReceive;
+        this.maxExtract = maxExtract;
+        this.energy = Math.max(0 , Math.min(capacity, energy));
     }
 
     // Override this to (for example) call setChanged() on your block entity
@@ -13,21 +39,55 @@ public class CustomEnergyStorage extends EnergyStorage {
     }
 
     @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
-        int rc = super.receiveEnergy(maxReceive, simulate);
-        if (rc > 0 && !simulate) {
+    public int receiveEnergy(int maxReceive, boolean simulate)
+    {
+        if (!canReceive())
+            return 0;
+
+        int energyReceived = Math.min(capacity - energy, Math.min(this.maxReceive, maxReceive));
+        if (!simulate)
+            energy += energyReceived;
+        if (energyReceived > 0 && !simulate) {
             onEnergyChanged();
         }
-        return rc;
+        return energyReceived;
     }
 
     @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
-        int rc = super.extractEnergy(maxExtract, simulate);
-        if (rc > 0 && !simulate) {
+    public int extractEnergy(int maxExtract, boolean simulate)
+    {
+        if (!canExtract())
+            return 0;
+
+        int energyExtracted = Math.min(energy, Math.min(this.maxExtract, maxExtract));
+        if (!simulate)
+            energy -= energyExtracted;
+        if (energyExtracted > 0 && !simulate) {
             onEnergyChanged();
         }
-        return rc;
+        return energyExtracted;
+    }
+
+    @Override
+    public int getEnergyStored() {
+        return energy;
+    }
+
+    @Override
+    public int getMaxEnergyStored() {
+        return capacity;
+    }
+
+    @Override
+    public boolean canExtract()
+    {
+        return this.maxExtract > 0;
+    }
+
+    @Override
+    public boolean canReceive()
+    {
+        return this.maxReceive > 0 && this.energy < this.capacity;
     }
 
     public void setEnergy(int energy) {
@@ -38,7 +98,7 @@ public class CustomEnergyStorage extends EnergyStorage {
     public void addEnergy(int energy) {
         this.energy += energy;
         if (this.energy > getMaxEnergyStored()) {
-            this.energy = getEnergyStored();
+            this.energy = getMaxEnergyStored();
         }
         onEnergyChanged();
     }
@@ -49,5 +109,9 @@ public class CustomEnergyStorage extends EnergyStorage {
             this.energy = 0;
         }
         onEnergyChanged();
+    }
+
+    public LazyOptional<IEnergyContainer> getEnergyCapability(){
+        return LazyOptional.of(() -> this);
     }
 }

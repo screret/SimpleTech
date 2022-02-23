@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "in_structure=false": {
+      "model": "simpletech:block/fission_reactor_frame"
+    },
+    "in_structure=true": {
+      "model": "simpletech:block/fission_reactor_frame"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "type": "simpletech:rot",
+  "group": "",
+  "ingredient": {
+    "tag": "minecraft:leaves",
+    "count": 1
+  },
+  "output": 50,
+  "time": 10
+}
